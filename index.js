@@ -70,7 +70,7 @@ async function run() {
       const result = await carCollection.updateOne(filter, doc, options);
       res.send(result)
     })
-    //decrease value
+    //decrease  value for a product
     app.put("/items/:id", async (req, res) => {
       const id = req.params.id;
       const prevQuantity = parseInt(req.query.prevQuantity);
