@@ -41,14 +41,14 @@ async function run() {
 
       res.send(item);
     })
-    //delete button
+    //delete button for item
     app.delete('/item/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await carCollection.deleteOne(query);
       res.send(result)
     })
-    //add data
+    //add data for item
     app.post("/item", async (req, res) => {
       const newUser = req.body;
       const result = await carCollection.insertOne(newUser);
