@@ -3,6 +3,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+require("dotenv").config()
 //const res = require('express/lib/response');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 app.use(cors());
@@ -10,11 +11,11 @@ app.use(express.json());
 function verifyJwt(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    return res.status(404).send({ message: "unauhorized user" });
+    return res.status(401).send({ message: "unauhorized user" });
   }
-  const token = authHeader.split("")[1];
-  jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
-    if (err) {
+  const token = authHeader.split(" ")[1];
+  jwt.verify(token, process.env.JWT_SECRET_KEY, (error, decoded) => {
+    if (error) {
       return res.status(403).send({ message: "forbidden access" })
     }
     req.decoded = decoded;
@@ -24,7 +25,8 @@ function verifyJwt(req, res, next) {
 }
 
 
-const uri = "mongodb+srv://flower:y8uqXpfW0PqFFGDd@cluster0.ngj4j.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ngj4j.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+console.log(uri)
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
@@ -42,14 +44,15 @@ async function run() {
     });
       res.send({ accessToken });
     });
+    
 
     //same email
-    app.get("/personaldata", verifyJwt, async (req, res) => {
+    app.get("/personalData", verifyJwt, async (req, res) => {
       const decodedEmail = req.decoded.email;
       const email = req.query.email;
       if (email === decodedEmail) {
-        const querry = { email: email };
-        const cursor = carCollection.find(querry);
+        const queryy = { email: email };
+        const cursor = carCollection.find(queryy);
         const result = await cursor.toArray();
         res.send(result);
       } else {
