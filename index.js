@@ -54,7 +54,7 @@ async function run() {
       const result = await carCollection.insertOne(newUser);
       res.send(result)
     })
-    //update data
+    //update data for item
     app.put("/item/:id", async (req, res) => {
       const id = req.params.id;
       const prevQuantity = parseInt(req.query.prevQuantity);
