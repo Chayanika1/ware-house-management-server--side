@@ -7,6 +7,21 @@ const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 app.use(cors());
 app.use(express.json());
+function verifyJwt(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(404).send({ message: "unauhorized user" });
+  }
+  const token = authHeader.split("")[1];
+  jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
+    if (err) {
+      return res.status(403).send({ message: "forbidden access" })
+    }
+    req.decoded = decoded;
+    next();
+
+  });
+}
 
 
 const uri = "mongodb+srv://flower:y8uqXpfW0PqFFGDd@cluster0.ngj4j.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
@@ -19,17 +34,31 @@ async function run() {
     await client.connect();
     const carCollection = client.db('car').collection('collection');
     //auth token
-    
-    app.post('/login', async (req, res) => {
+
+    app.post("/login", async (req, res) => {
       const user = req.body;
       const accessToken = jwt.sign(user, `${process.env.JWT_SECRET_KEY}`, {
-          expiresIn: '1d'
-      });
+        expiresIn: '1d'
+    });
       res.send({ accessToken });
-  })
+    });
+
+    //same email
+    app.get("/personaldata", verifyJwt, async (req, res) => {
+      const decodedEmail = req.decoded.email;
+      const email = req.query.email;
+      if (email === decodedEmail) {
+        const querry = { email: email };
+        const cursor = carCollection.find(querry);
+        const result = await cursor.toArray();
+        res.send(result);
+      } else {
+        res.status(403).send({ message: "Forbidden access" });
+      }
+    });
 
     app.get('/item', async (req, res) => {
-      const query = { };
+      const query = {};
       const cursor = carCollection.find(query);
       const items = await cursor.toArray();
       res.send(items);
