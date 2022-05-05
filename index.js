@@ -116,6 +116,10 @@ async function run() {
       const result = await carCollection.updateOne(filter, doc, options);
       res.send(result);
     });
+    //root
+    app.get('/',(req,res)=>{
+      res.send("hello i can learn code");
+    })
 
   }
   finally {
